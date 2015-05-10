@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  div.site-wrapper
+    div.site-wrapper-inner
+      div.container#play-type
+        div(class="btn-group" role="group")
+          button(id="single_play" class="btn btn-lg btn-danger player" type="button") Single-player
+          button(id="multi_play" class="btn btn-lg btn-danger player" type="button") Multi-player
+      div.container#difficulty-level
+        div(class="btn-group" role="group")
+          button(value="0" class="btn btn-lg btn-danger level" type="button") Easy
+          button(value="1" class="btn btn-lg btn-danger level" type="button") Nomal
+          button(value="2" class="btn btn-lg btn-danger level" type="button") Hard
+      div.container#game
+        div#input
+        div#scrambled
+  script.
+    var scramble = new Scramble();
