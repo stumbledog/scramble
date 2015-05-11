@@ -73,12 +73,11 @@ function Scramble(){
 		// });
 
 		$("#scrambled").on("click", ".character", this.input.bind(this));
-		$("#input").on("click", ".character", function(){
+		$("#input").on("click", ".character", function(e){
 			if(this.playing){
-				$("#scrambled").append(this);
+				$("#scrambled").append($(e.target));
 			}
-
-		});
+		}.bind(this));
 
 		$(document).on("keydown", function(e){
 			if(this.playing){
