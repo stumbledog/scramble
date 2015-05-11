@@ -12,7 +12,7 @@ var word_controller = require('./controllers/word');
 var routes = require('./routes/index');
 
 var app = express();
-var server = app.listen(3000);
+var server = app.listen(5000);
 var io = require('socket.io').listen(server);
 
 // view engine setup
