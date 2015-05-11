@@ -3,41 +3,59 @@ extends layout
 block content
   div.site-wrapper
     div.site-wrapper-inner
-      div.container#play-type
-        div#single-player.inline-block
-          i(class="fa fa-user fa-5x")
-          h4 Single-player
-        div#multi-player.inline-block
-          i(class="fa fa-users fa-5x")
-          h4 Multi-player
-      div.container#difficulty-level
-        h1 Select Difficulty Level
-        div(class="btn-group" role="group")
-          button(value="0" class="btn btn-lg btn-danger level" type="button") Easy
-          button(value="1" class="btn btn-lg btn-danger level" type="button") Nomal
-          button(value="2" class="btn btn-lg btn-danger level" type="button") Hard
-      div.container#game
+      div#home.container
+        div.margin-bottom-10px
+          button.play(class="btn btn-play btn-home" type="button")
+            i(class="fa fa-user")
+            h4.inline-block &nbsp;&nbsp;Play
+        div.margin-bottom-10px
+          button.play-online(class="btn btn-play-online btn-home" type="button")
+            i(class="fa fa-users")
+            h4.inline-block &nbsp;&nbsp;Play Online
+        div
+          button.leaderboard(class="btn btn-leaderboard btn-home" type="button")
+            i(class="fa fa-list-ol")
+            h4.inline-block &nbsp;&nbsp;Leaderboard
+      div#game.container
+        div#head-container
+          div#points-container
+            h6 Points
+            h4#points
+          div#best-points-container
+            h6 Best Points
+            h4#best-points 0 pts
+          div#count-container
+            h6 Countdown
+            h4#count 60s
         div#input.typing
         div#scrambled
-      h2#anagram.inline-block Anagram x2 Points
-      div.container#multiplay-game
-        div#clients
-          div#player1.player
-          div#player2.player
-          div#player3.player
-        div#mygame
+      div#online-game.container
+        div#clients.hidden-xs.col-sm-6
+          div.panel.panel-default.player#player1
+            div.panel-heading Player 1
+            div.panel-body
+              Panel content
+          div.panel.panel-default.player#player1
+            div.panel-heading Player 2
+            div.panel-body
+              Panel content
+          div.panel.panel-default.player#player1
+            div.panel-heading Player 3
+            div.panel-body
+              Panel content
+        div#mygame.col-xs-12.col-sm-6
           div
           div
-            //button(id="multi-start" class="btn btn-success" type="button") Start
-  div#timer
-    h1#count
-  h1#points
-  div#result
-    div
-      h4.inline-block Your points are&nbsp;
-      h4.inline-block#your-points.inline-block
-    div#menu
-      button(id="select-level" class="btn btn-info" type="button") Select Level
-      button(id="play-again" class="btn btn-success" type="button") Play again
+            button(id="multi-start" class="btn btn-success" type="button") Start
+      div#bottom-menu
+        div.play.inline-block.btn-bottom
+          i(class="fa fa-user fa-2x")
+          h5 Play
+        div.play-online.inline-block.btn-bottom
+          i(class="fa fa-users fa-2x")
+          h5 Play Online
+        div.leaderboard.inline-block.btn-bottom
+          i(class="fa fa-list-ol fa-2x")
+          h5 Leaderboard
   script.
     var scramble = new Scramble();

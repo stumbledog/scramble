@@ -1,32 +1,35 @@
 function Scramble(){
 	this.socket = io.connect();
-	//this.difficulty_level;
-	//this.scrambled;
 	this.playing = false;
 	this.points = 0;
-
 	this.clients = [];
-
+	this.online = false;
 
 	initEventListener.call(this);
+	this.cssAnimation = supportsTransitions();
+	console.log(this.cssAnimation);
 
 	function initEventListener(){
-		$("#single-player, #select-level").click(function(){
-			this.selectLevel();
+		$(".play").click(function(){
+			this.online = false;
+			this.play();
 		}.bind(this));
 
-		$("#multi-player").click(function(){
-			//this.multiplay();
+		$(".play-online").click(function(){
+			this.online = true;
+			this.playOnline();
 		}.bind(this));
 
 		$("#play-again").click(function(){
-			this.start();
+			if(this.online){
+				this.playOnline();
+			}else{
+				this.play();
+			}
 		}.bind(this));
 
-		$(".level").click(function(e){
-			$target = $(e.target);
-			this.difficulty_level = $target.val();
-			this.start();
+		$("#multi-start").click(function(){
+			this.socket.emit("request start");
 		}.bind(this));
 
 		this.socket.on('scrambled', function(res){
@@ -47,14 +50,34 @@ function Scramble(){
 			$("#multi-start").show();
 		});
 
-		this.socket.on('guest', function(res){
+		this.socket.on('client', function(res){
 			this.host = false;
-			this.clients = res.clients;
+			this.clients = res.clients.filter(function(client){
+				console.log(this);
+				return client != this.socket.id;
+			}.bind(this));
+			console.log(this.clients);
 		});
 
-
 		this.socket.on('join', function(res){
+			console.log(res.id+" joined");
 			this.clients.push(res.id);
+			console.log(this.clients);
+		});
+
+		this.socket.on('leave', function(res){
+			console.log(res.id +" left");
+			console.log(res);
+			console.log(this.clients);
+			this.clients = this.clients.filter(function(client){
+				return client != res.id;
+			});
+			console.log(this.clients);
+			//this.clients.push(res.id);
+		});
+
+		this.socket.on('host start game', function(res){
+			console.log("host started game");
 		});
 
 		// this.socket.on('submit points', function(res){
@@ -76,6 +99,8 @@ function Scramble(){
 		$("#input").on("click", ".character", function(e){
 			if(this.playing){
 				$("#scrambled").append($(e.target));
+			}else{
+				this.play();
 			}
 		}.bind(this));
 
@@ -99,46 +124,68 @@ function Scramble(){
 			}
 		}.bind(this))
 	};
+
+	function supportsTransitions(){
+		var b = document.body || document.documentElement,
+		s = b.style,
+		p = 'transition';
+
+		if (typeof s[p] == 'string') { return true; }
+
+		// Tests for vendor specific prop
+		var v = ['Moz', 'webkit', 'Webkit', 'Khtml', 'O', 'ms'];
+		p = p.charAt(0).toUpperCase() + p.substr(1);
+
+		for (var i=0; i<v.length; i++) {
+			if (typeof s[v[i] + p] == 'string') { return true; }
+		}
+
+		return false;
+	}
 }
 
-Scramble.prototype.selectLevel = function(){
-	$("#play-type, #result, #game").hide();
-	$("#difficulty-level").show();
-}
-
-Scramble.prototype.start = function(){
+Scramble.prototype.play = function(){
 	$(".character").remove();
-	$("#difficulty-level, #result").hide();
-	$("#game").show();
+	$("#home, #online-game").hide();
+	$("#game, #bottom-menu, #top-menu").show();
 	this.playing = true;
 	this.points = 0;
 	$("#points").html(this.points+" pts");
-	this.socket.emit('scrambled', this.difficulty_level);
+	this.socket.emit('scrambled');
 	this.countDown();
 }
 
 Scramble.prototype.countDown = function(){
-	var start_time, now, remain_time, interval, alert = false;
+	var start_time, now, remain_time, interval;
+
   	start_time = new Date();
-	interval = setInterval(function(){
+  	clearInterval(this.interval);
+
+	this.interval = setInterval(function(){
 		now = new Date();
 		remain_time = Math.ceil((60000 - parseInt(now - start_time))/1000);
+
 		$("#count").html(remain_time+"s");
-		if(!alert && remain_time <= 10){
-			$("#count").addClass("alert");
-		}
+
 		if(remain_time <= 0){
-			clearInterval(interval);
-			$("#count").removeClass("alert");
+			clearInterval(this.interval);
 			this.gameOver();
 		}
+
 	}.bind(this), 100);
 }
 
 Scramble.prototype.gameOver = function(){
-	this.playing = false;
-	$("#result").show();
-	$("#your-points").html(this.points);
+	$(".character").remove();
+
+	setTimeout(function(){
+		var str = this.points+" Points";
+		str.split("").forEach(function(character){
+			$("#input").append("<button class='btn btn-default character'>"+character+"</button>");
+		});
+		this.renderScrambled({scrambled:"Play Again"});
+		this.playing = false;
+	}.bind(this), 500);
 }
 
 Scramble.prototype.renderScrambled = function(word){
@@ -171,6 +218,8 @@ Scramble.prototype.input = function(event){
 			});
 			this.socket.emit("submit", word);
 		}
+	}else{
+		this.play();
 	}
 }
 
@@ -190,7 +239,7 @@ Scramble.prototype.correct = function(res){
 	$("#points").html(this.points+" pts");
 
 	$("#input .character").addClass("fadeout");
-	this.socket.emit('scrambled', this.difficulty_level);
+	this.socket.emit('scrambled');
 	$("#input").removeClass("typing").addClass("correct").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e){
 		$(".fadeout").remove();
 		$(this).removeClass("correct").addClass("typing");
@@ -203,9 +252,9 @@ Scramble.prototype.worng = function(){
 	});
 }
 
-Scramble.prototype.multiplay = function(){
-	$("#play-type").hide();
-	$("#multiplay-game").show();
+Scramble.prototype.playOnline = function(){
+	$("#home, #game").hide();
+	$("#online-game, #bottom-menu").show();
 	this.socket.emit('multiplay');
 }
 

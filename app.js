@@ -32,14 +32,34 @@ io.sockets.on('connection', function (socket) {
 
 	console.log('A new user connected!');
 
-	socket.on('scrambled', function(difficulty_level){
-		word_controller.getWord(difficulty_level, function(data){
+	socket.on('scrambled', function(){
+		word_controller.getWord(function(data){
 			socket.word = data.word;
 			socket.anagram = word_controller.anagram(data.word);
 			socket.emit('scrambled', { word:data.word, scrambled: data.scrambled });
 			console.log(data);
 		});
 	});
+
+	socket.on('submit', function(word){
+		console.log(word, socket.word);
+		if(word === socket.anagram){
+			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:true, anagram:true, points:word.length *2});
+		}else if(word === socket.word){
+			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:true, anagram:false, points:word.length});
+		}else{
+			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:false, anagram:false, points:0});
+		}
+	});
+
+	socket.on('submit points', function(points){
+		user_controller.submitPoints(socket.id, "user name", points, function(myrecord){
+			user_controller.getLeaderBoard(function(leaderboard){
+				socket.emit('submit points', { myrecord:myrecord, leaderboard:leaderboard });
+			})
+		});
+	});
+
 
 	socket.on('multiplay', function(){
 		socket.host = true;
@@ -71,34 +91,16 @@ io.sockets.on('connection', function (socket) {
 			socket.emit('host', {room:socket.room});
 		}else{
 			socket.to(socket.room).emit('join', {id:socket.id});
-			socket.emit('guest', {clients:clients});
+			socket.emit('client', {clients:clients});
 		}
 	});
 
-	socket.on('submit', function(word){
-		var points;
-		console.log(word, socket.word);
-		if(word === socket.anagram){
-			points = word.length *2;
-			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:true, anagram:true, points:points});
-		}else if(word === socket.word){
-			points = word.length;
-			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:true, anagram:false, points:points});
-		}else{
-			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:false, anagram:false, points:0});
-		}
+	socket.on('request start', function(){
+		socket.to(socket.room).emit('join', {id:socket.id});
 	});
 
-	socket.on('submit points', function(points){
-		user_controller.submitPoints(socket.id, "user name", points, function(myrecord){
-			user_controller.getLeaderBoard(function(leaderboard){
-				socket.emit('submit points', { myrecord:myrecord, leaderboard:leaderboard });
-			})
-		});
-	});
-
-	socket.on('multiplay start', function(){
-
+	socket.on('disconnect', function () {
+		socket.to(socket.room).emit('host start game');
 	});
 });
 

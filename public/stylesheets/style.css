@@ -2,7 +2,7 @@ html{
 	height:100%;
 }
 body{
-	background-color: #E3CDA4;
+	background-color: #A49A87;
 	height:100%;
 	font-family: 'Open Sans', sans-serif;
 }
@@ -13,6 +13,10 @@ a{
 
 h1,h2,h4{
 	font-weight: bold;
+}
+
+.margin-bottom-10px{
+		margin-bottom: 10px;
 }
 
 .inline-block{
@@ -33,25 +37,77 @@ h1,h2,h4{
 	overflow: hidden;
 }
 
-.flash {
-  animation: flash 1s;
-  -webkit-animation: flash 1s;
+.btn-home{
+	width:200px;
 }
 
-.hinge{
-	animation: hinge 1.0s;
-	-webkit-animation: hinge 1.0s;
+.btn-play{
+	color:#FFF;
+	background: #FF974F;
 }
 
-.bounceInUp{
-	animation: bounceInUp 1.0s;
-	-webkit-animation: bounceInUp 1.0s;
+.btn-play:hover{
+	color:#FFF;
+	background: #CF671F;
+}
+
+.btn-play-online{
+	color:#FFF;
+	background: #644D52;
+}
+
+.btn-play-online:hover{
+	color:#FFF;
+	background: #341D22;
+}
+
+.btn-leaderboard{
+	color:#FFF;
+	background: #F77A52;
+}
+
+.btn-leaderboard:hover{
+	color:#FFF;
+	background: #C74A22;
+}
+
+#bottom-menu{
+	display: none;
+	position: fixed;
+	background: #EEE;
+	bottom: 0px;
+	width:100%;
+	height:60px;
+	text-align: center
+}
+
+.btn-bottom{
+	color:#666;
+	width:33%;
+	margin-top: 0px;
+}
+
+.btn-bottom:hover{
+	color:#000;
+	cursor: pointer;
+}
+
+.btn-bottom>i{
+	margin-top: 7px;
+}
+.btn-bottom>h5{
+	margin-top: 2px;
+}
+
+.btn-bottom:not(:last-child){
+	border-right: 2px solid #666;
 }
 
 .container{
 	margin-left: auto;
 	margin-right: auto;
 	text-align: center;
+	width:100% !important;
 }
 
 #single-player{
@@ -79,30 +135,43 @@ h1,h2,h4{
 	margin-bottom: 20px;
 }
 
-#timer{
-	position:fixed;
-	top:10px;
-	right:30px;
+#head-container{
+	position: fixed;
+	top:5px;
+	width:100%;
+	text-align: center;
 }
 
+#head-container h4{
+	margin-top:0px;
+}
+#head-container h6{
+	margin-bottom:5px;
+}
+
+#points-container,
+#best-points-container,
+#count-container{
+	display: inline-block;
+	margin-left: 5px;
+	margin-right: 5px;
+	background: #332532;
+	border-radius: 5px;
+	padding: 0 10px;
+	color:#FFF;
+}
+
+/*
 #count{
 	font-weight: bolder;
 }
 
 .alert{
-	padding:0px;
 	color:#8E2800;
-	font-size:54px;
-}
+}*/
 
 #points{
-	position:fixed;
-	top:10px;
-	width:300px;
-	left:50%;
-	margin-left: -150px;
-	text-align: center;
-	font-weight: bolder;
+
 }
 
 .correct{
@@ -112,33 +181,28 @@ h1,h2,h4{
 
 #input .character{
 	color:#fff;
-	background:#E6B26E;
-	border-color:#A6804F;
-	border-width: 3px;
+	background:#644D52;
 }
 
 #input .character:hover{
-	background:#674F31;
-	border-color:#000000;
+	background:#332532;
 }
 
 #scrambled .character{
 	color:#fff;
-	background:#E6B26E;
-	border-color:#A6804F;
-	border-width: 3px;
+	background:#FF974F;
 }
 
 #scrambled .character:hover{
-	background:#674F31;
-	border-color:#000000;
+	background:#F77A52;
+}
+
+.play-again{
+	background:#332532 !important;
 }
 
 .correct .character{
-	-webkit-transition: background 0.5s, border-color 0.5s; /* Safari */
-	transition: background 0.5s, border-color 0.5s;
 	background:#5C832F !important;
-	border-color:#284907 !important;
 }
 
 .typing:after{
@@ -165,6 +229,10 @@ h1,h2,h4{
 	-webkit-animation: wobble 1s;
 }
 
+.wrong>.character{
+	background:#8E2800 !important;
+}
+
 #input.character{
 	animation: bounceInDown 0.5s !important;
 	-webkit-animation: bounceInDown 0.5s !important;
@@ -185,9 +253,14 @@ h1,h2,h4{
 }
 
 @media (max-width: 400px){
+	#head-container h4,
+	#head-container h6{
+		font-size: 80%;
+	}
 	.character{
 		font-size: 24px;
 	}
+
 	.character,
 	#input,
 	#input:after{
@@ -200,6 +273,10 @@ h1,h2,h4{
 }
 
 @media (min-width: 400px) and (max-width: 600px){
+	#head-container h4,
+	#head-container h6{
+		font-size: 90%;
+	}
 	.character{
 		font-size: 30px;
 	}
@@ -230,6 +307,10 @@ h1,h2,h4{
 }
 
 @media (min-width: 800px){
+	#head-container h4,
+	#head-container h6{
+		font-size: 120%;
+	}
 	.character{
 		font-size: 70px;
 	}
@@ -269,40 +350,30 @@ h1,h2,h4{
 	overflow-y:auto;
 }
 
-#bottom-menu{
-	position: fixed;
-	bottom: 0px;
-	width:100%;
-	height:80px;
-	text-align: center
-}
-
 #select-level{
 	margin-right: 20px;
 }
 
-#multiplay-game{
+#online-game{
 	width:100%;
 	height:100%;
 	display: none;
 }
 
 #mygame{
-	width:49%;
 	height:99%;
 	border: 1px solid black;
 	display: inline-block;
 }
 
 #clients{
-	width:49%;
 	height:100%;
 	display: inline-block;
 }
 
 .player{
 	width:100%;
-	height:33%;
+	height:32%;
 	border: 1px solid black;
 }
 
