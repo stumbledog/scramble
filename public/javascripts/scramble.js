@@ -16,7 +16,7 @@ function Scramble(){
 		}.bind(this));
 
 		$("#multi-player").click(function(){
-			this.multiplay();
+			//this.multiplay();
 		}.bind(this));
 
 		$("#play-again").click(function(){
@@ -34,7 +34,6 @@ function Scramble(){
 		}.bind(this));
 
 		this.socket.on('submit', function(res){
-			console.log(res);
 			if(this.socket.id === res.id && res.correct){
 				this.correct(res);
 			}else{
@@ -45,19 +44,16 @@ function Scramble(){
 		this.socket.on('host', function(res){
 			this.host = true;
 			this.clients = [];
-			console.log(res);
 			$("#multi-start").show();
 		});
 
 		this.socket.on('guest', function(res){
 			this.host = false;
 			this.clients = res.clients;
-			console.log(res);
 		});
 
 
 		this.socket.on('join', function(res){
-			console.log(res);
 			this.clients.push(res.id);
 		});
 
@@ -78,7 +74,10 @@ function Scramble(){
 
 		$("#scrambled").on("click", ".character", this.input.bind(this));
 		$("#input").on("click", ".character", function(){
-			$("#scrambled").append(this);
+			if(this.playing){
+				$("#scrambled").append(this);
+			}
+
 		});
 
 		$(document).on("keydown", function(e){
@@ -114,6 +113,7 @@ Scramble.prototype.start = function(){
 	$("#game").show();
 	this.playing = true;
 	this.points = 0;
+	$("#points").html(this.points+" pts");
 	this.socket.emit('scrambled', this.difficulty_level);
 	this.countDown();
 }
@@ -153,23 +153,25 @@ Scramble.prototype.renderScrambled = function(word){
 }
 
 Scramble.prototype.input = function(event){
-	if(typeof event === "string"){
-		$("#scrambled .character").each(function(scrambled_character){
-			if($(this).text() === event){
-				$("#input").append(this);
-				return false;
-			}
-		});
-	}else{
-		$("#input").append($(event.target));
-	}
+	if(this.playing){
+		if(typeof event === "string"){
+			$("#scrambled .character").each(function(scrambled_character){
+				if($(this).text() === event){
+					$("#input").append(this);
+					return false;
+				}
+			});
+		}else{
+			$("#input").append($(event.target));
+		}
 
-	if($("#scrambled .character").length === 0){
-		var word = "";
-		$("#input .character").each(function(){
-			word += $(this).text();
-		});
-		this.socket.emit("submit", word);
+		if($("#scrambled .character").length === 0){
+			var word = "";
+			$("#input .character").each(function(){
+				word += $(this).text();
+			});
+			this.socket.emit("submit", word);
+		}
 	}
 }
 
