@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var request = require('request');
-var mongoose = require('mongoose');
+//var mongoose = require('mongoose');
 
 var word_controller = require('./controllers/word');
 //var leaderBoard = require('./controllers/leaderboard');
