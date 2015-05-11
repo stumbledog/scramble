@@ -5,10 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var request = require('request');
+var mongoose = require('mongoose');
 
 var word_controller = require('./controllers/word');
+//var leaderBoard = require('./controllers/leaderboard');
 var routes = require('./routes/index');
-//var users = require('./routes/users');
 
 var app = express();
 var server = app.listen(3000);
@@ -27,13 +28,16 @@ app.use('/', routes);
 word_controller.init();
 
 /* Socket */
-io.sockets.on('connection', function (socket) {
+io.sockets.on('connection', function (socket) {	
+
 	console.log('A new user connected!');
 
 	socket.on('scrambled', function(difficulty_level){
 		word_controller.getWord(difficulty_level, function(data){
 			socket.word = data.word;
+			socket.anagram = word_controller.anagram(data.word);
 			socket.emit('scrambled', { word:data.word, scrambled: data.scrambled });
+			console.log(data);
 		});
 	});
 
@@ -57,32 +61,45 @@ io.sockets.on('connection', function (socket) {
 			}
 		});
 
-		//console.log(adapter.rooms);
-		//console.log(io.sockets.manager.roomClients[socket.id]);
+		var clients = [];
+		var clients_in_the_room = adapter.rooms[socket.room]; 
+		for (var clientId in clients_in_the_room ) {
+			clients.push(clientId);
+		}
 
-		console.log(socket.room);
-		console.log(socket.rooms);
+		if(socket.host){
+			socket.emit('host', {room:socket.room});
+		}else{
+			socket.to(socket.room).emit('join', {id:socket.id});
+			socket.emit('guest', {clients:clients});
+		}
 	});
 
 	socket.on('submit', function(word){
+		var points;
 		console.log(word, socket.word);
+		if(word === socket.anagram){
+			points = word.length *2;
+			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:true, anagram:true, points:points});
+		}else if(word === socket.word){
+			points = word.length;
+			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:true, anagram:false, points:points});
+		}else{
+			io.sockets.in(socket.id).emit('submit', {id:socket.id, correct:false, anagram:false, points:0});
+		}
 	});
 
-	socket.on('play', function(){
-
+	socket.on('submit points', function(points){
+		user_controller.submitPoints(socket.id, "user name", points, function(myrecord){
+			user_controller.getLeaderBoard(function(leaderboard){
+				socket.emit('submit points', { myrecord:myrecord, leaderboard:leaderboard });
+			})
+		});
 	});
 
-/*
-	socket.on('create room', function(){
-		socket.status = "host";
+	socket.on('multiplay start', function(){
 
 	});
-
-	socket.on('join room', function(){
-		socket.status = "join";
-
-	});
-*/
 });
 
 

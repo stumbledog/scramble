@@ -1,4 +1,4 @@
-var word_api_url = "http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=false&minCorpusCount=0&maxCorpusCount=-1&minDictionaryCount=1&maxDictionaryCount=-1&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5";
+var word_api_url = "http://api.wordnik.com:80/v4/words.json/randomWord?hasDictionaryDef=true&minCorpusCount=0&maxCorpusCount=-1&minDictionaryCount=10&maxDictionaryCount=-1&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5";
 var request = require('request');
 var words = [[],[],[]];
 
@@ -44,4 +44,8 @@ exports.scramble = function(word){
 		}
 	}while(word === scrambled)
 	return scrambled;
+}
+
+exports.anagram = function(word){
+	return word.split('').reverse().join('');
 }

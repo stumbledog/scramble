@@ -4,16 +4,40 @@ block content
   div.site-wrapper
     div.site-wrapper-inner
       div.container#play-type
-        div(class="btn-group" role="group")
-          button(id="single_play" class="btn btn-lg btn-danger player" type="button") Single-player
-          button(id="multi_play" class="btn btn-lg btn-danger player" type="button") Multi-player
+        div#single-player.inline-block
+          i(class="fa fa-user fa-5x")
+          h4 Single-player
+        div#multi-player.inline-block
+          i(class="fa fa-users fa-5x")
+          h4 Multi-player
       div.container#difficulty-level
+        h1 Select Difficulty Level
         div(class="btn-group" role="group")
           button(value="0" class="btn btn-lg btn-danger level" type="button") Easy
           button(value="1" class="btn btn-lg btn-danger level" type="button") Nomal
           button(value="2" class="btn btn-lg btn-danger level" type="button") Hard
       div.container#game
-        div#input
+        div#input.typing
         div#scrambled
+      h1#anagram.inline-block Anagram x2 Points
+      div.container#multiplay-game
+        div#clients
+          div#player1.player
+          div#player2.player
+          div#player3.player
+        div#mygame
+          div
+          div
+            //button(id="multi-start" class="btn btn-success" type="button") Start
+  div#timer
+    h1#count
+  h1#points
+  div#result
+    div
+      h4.inline-block Your points are&nbsp;
+      h4.inline-block#your-points.inline-block
+    div#menu
+      button(id="select-level" class="btn btn-info" type="button") Select Level
+      button(id="play-again" class="btn btn-success" type="button") Play again
   script.
     var scramble = new Scramble();
