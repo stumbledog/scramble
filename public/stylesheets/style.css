@@ -107,6 +107,7 @@ h1,h2,h4{
 .container{
 	margin-left: auto;
 	margin-right: auto;
+	padding: 0px;
 	text-align: center;
 	width:100% !important;
 }
@@ -136,23 +137,23 @@ h1,h2,h4{
 	margin-bottom: 20px;
 }
 
-#head-container{
-	position: fixed;
+.head-container{
+	position: absolute;
 	top:5px;
 	width:100%;
 	text-align: center;
 }
 
-#head-container h4{
+.head-container h4{
 	margin-top:0px;
 }
-#head-container h6{
+.head-container h6{
 	margin-bottom:5px;
 }
 
-#points-container,
-#best-points-container,
-#count-container{
+.points-container,
+.best-points-container,
+.count-container{
 	display: inline-block;
 	margin-left: 5px;
 	margin-right: 5px;
@@ -160,19 +161,6 @@ h1,h2,h4{
 	border-radius: 5px;
 	padding: 0 10px;
 	color:#FFF;
-}
-
-/*
-#count{
-	font-weight: bolder;
-}
-
-.alert{
-	color:#8E2800;
-}*/
-
-#points{
-
 }
 
 .correct{
