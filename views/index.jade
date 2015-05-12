@@ -20,33 +20,26 @@ block content
         div#head-container
           div#points-container
             h6 Points
-            h4#points
+            h4#points 0 pts
           div#best-points-container
             h6 Best Points
             h4#best-points 0 pts
           div#count-container
             h6 Countdown
             h4#count 60s
-        div#input.typing
-        div#scrambled
+        div.input.typing
+        div.scrambled
       div#online-game.container
-        div#clients.hidden-xs.col-sm-6
-          div.panel.panel-default.player#player1
-            div.panel-heading Player 1
-            div.panel-body
-              Panel content
-          div.panel.panel-default.player#player1
-            div.panel-heading Player 2
-            div.panel-body
-              Panel content
-          div.panel.panel-default.player#player1
-            div.panel-heading Player 3
-            div.panel-body
-              Panel content
+        div#clients.hidden-xs.col-sm-6          
+          div.player#player1
+          div.player#player2
+          div.player#player3
         div#mygame.col-xs-12.col-sm-6
-          div
-          div
-            button(id="multi-start" class="btn btn-success" type="button") Start
+          div#mygame-wrapper
+            div#mygame-wrapper-inner
+              div.container
+                div.input.typing
+                div.scrambled
       div#bottom-menu
         div.play.inline-block.btn-bottom
           i(class="fa fa-user fa-2x")

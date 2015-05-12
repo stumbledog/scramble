@@ -16,7 +16,7 @@ h1,h2,h4{
 }
 
 .margin-bottom-10px{
-		margin-bottom: 10px;
+	margin-bottom: 10px;
 }
 
 .inline-block{
@@ -78,7 +78,8 @@ h1,h2,h4{
 	bottom: 0px;
 	width:100%;
 	height:60px;
-	text-align: center
+	text-align: center;
+	opacity: 0.7;
 }
 
 .btn-bottom{
@@ -130,7 +131,7 @@ h1,h2,h4{
 	display: none;
 }
 
-#input{
+.input{
 	display:inline-block;
 	margin-bottom: 20px;
 }
@@ -179,21 +180,21 @@ h1,h2,h4{
 	-webkit-animation: zoomOutDown 1.0s;
 }
 
-#input .character{
+.input .character{
 	color:#fff;
 	background:#644D52;
 }
 
-#input .character:hover{
+.input .character:hover{
 	background:#332532;
 }
 
-#scrambled .character{
+.scrambled .character{
 	color:#fff;
 	background:#FF974F;
 }
 
-#scrambled .character:hover{
+.scrambled .character:hover{
 	background:#F77A52;
 }
 
@@ -233,7 +234,7 @@ h1,h2,h4{
 	background:#8E2800 !important;
 }
 
-#input.character{
+.input.character{
 	animation: bounceInDown 0.5s !important;
 	-webkit-animation: bounceInDown 0.5s !important;
 }
@@ -250,79 +251,6 @@ h1,h2,h4{
 	animation: blink 1.1s steps(2, start) infinite;
 	-webkit-animation-delay: 1.2s;
 	-webkit-animation: blink 1.1s steps(2, start) infinite;
-}
-
-@media (max-width: 400px){
-	#head-container h4,
-	#head-container h6{
-		font-size: 80%;
-	}
-	.character{
-		font-size: 24px;
-	}
-
-	.character,
-	#input,
-	#input:after{
-		height:49px;
-	}
-	.character,
-	#input:after{
-		width:30px;
-	}
-}
-
-@media (min-width: 400px) and (max-width: 600px){
-	#head-container h4,
-	#head-container h6{
-		font-size: 90%;
-	}
-	.character{
-		font-size: 30px;
-	}
-	.character,
-	#input,
-	#input:after{
-		height:65px;
-	}
-	.character,
-	#input:after{
-		width:42px;
-	}
-}
-
-@media (min-width: 600px) and (max-width: 800px){
-	.character{
-		font-size: 48px;
-	}
-	.character,
-	#input,
-	#input:after{
-		height:89px;
-	}
-	.character,
-	#input:after{
-		width:55px;
-	}
-}
-
-@media (min-width: 800px){
-	#head-container h4,
-	#head-container h6{
-		font-size: 120%;
-	}
-	.character{
-		font-size: 70px;
-	}
-	.character,
-	#input,
-	#input:after{
-		height:121px;
-	}
-	.character,
-	#input:after{
-		width:75px;
-	}
 }
 
 #result{
@@ -361,9 +289,22 @@ h1,h2,h4{
 }
 
 #mygame{
-	height:99%;
-	border: 1px solid black;
-	display: inline-block;
+	height:100%;
+	background: #C77966;
+}
+
+#mygame-wrapper{
+	width:100%;
+	height:100%;
+	display: table;
+}
+
+#mygame-wrapper-inner{
+	width:100%;
+	height:100%;
+	display: table-cell;
+	vertical-align: middle;
+	overflow: hidden;
 }
 
 #clients{
@@ -373,8 +314,9 @@ h1,h2,h4{
 
 .player{
 	width:100%;
-	height:32%;
-	border: 1px solid black;
+	height:30%;
+	margin-bottom: 15px;
+	background: #7E827A;
 }
 
 #anagram{

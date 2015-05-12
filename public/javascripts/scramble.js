@@ -2,6 +2,7 @@ function Scramble(){
 	this.socket = io.connect();
 	this.playing = false;
 	this.points = 0;
+	this.best_points = 0;
 	this.clients = [];
 	this.online = false;
 
@@ -12,7 +13,7 @@ function Scramble(){
 	function initEventListener(){
 		$(".play").click(function(){
 			this.online = false;
-			this.play();
+			this.singlePlay();
 		}.bind(this));
 
 		$(".play-online").click(function(){
@@ -47,8 +48,10 @@ function Scramble(){
 		this.socket.on('host', function(res){
 			this.host = true;
 			this.clients = [];
-			$("#multi-start").show();
-		});
+			this.renderScrambled({scrambled:"Start"});
+
+			//$("#multi-start").show();
+		}.bind(this));
 
 		this.socket.on('client', function(res){
 			this.host = false;
@@ -80,6 +83,15 @@ function Scramble(){
 			console.log("host started game");
 		});
 
+		this.socket.on('submit points', function(res){
+			console.log(res);
+		});
+
+		this.socket.on('best points', function(best_points){
+			this.best_points = best_points;
+			$("#best-points").text(this.best_points + " pts");
+		}.bind(this));
+
 		// this.socket.on('submit points', function(res){
 		// 	$("#result").show();
 		// 	$("#your-points").html(res.myrecord.points);
@@ -95,10 +107,10 @@ function Scramble(){
 		// 	location.href = "#rank"+res.leaderboard.length;
 		// });
 
-		$("#scrambled").on("click", ".character", this.input.bind(this));
-		$("#input").on("click", ".character", function(e){
+		$(".site-wrapper").on("click", ".active .scrambled .character", this.input.bind(this));
+		$(".site-wrapper").on("click", ".active .input  .character", function(e){
 			if(this.playing){
-				$("#scrambled").append($(e.target));
+				$(".active .scrambled").append($(e.target));
 			}else{
 				this.play();
 			}
@@ -144,14 +156,28 @@ function Scramble(){
 	}
 }
 
+Scramble.prototype.singlePlay = function(){
+	$(".character").remove();
+	$("#home, #online-game").hide();
+	$("#game, #bottom-menu, #top-menu").show();
+	$("#game").addClass("active");
+	$("#online-game").removeClass("active");
+
+	this.renderScrambled({scrambled:"Start"});	
+}
+
 Scramble.prototype.play = function(){
 	$(".character").remove();
 	$("#home, #online-game").hide();
 	$("#game, #bottom-menu, #top-menu").show();
+	$("#game").addClass("active");
+	$("#online-game").removeClass("active");
+
 	this.playing = true;
 	this.points = 0;
 	$("#points").html(this.points+" pts");
 	this.socket.emit('scrambled');
+	clearInterval(this.interval);
 	this.countDown();
 }
 
@@ -163,7 +189,7 @@ Scramble.prototype.countDown = function(){
 
 	this.interval = setInterval(function(){
 		now = new Date();
-		remain_time = Math.ceil((60000 - parseInt(now - start_time))/1000);
+		remain_time = Math.ceil((5000 - parseInt(now - start_time))/1000);
 
 		$("#count").html(remain_time+"s");
 
@@ -176,12 +202,13 @@ Scramble.prototype.countDown = function(){
 }
 
 Scramble.prototype.gameOver = function(){
+	this.socket.emit('submit points',this.points);
 	$(".character").remove();
 
 	setTimeout(function(){
 		var str = this.points+" Points";
 		str.split("").forEach(function(character){
-			$("#input").append("<button class='btn btn-default character'>"+character+"</button>");
+			$(".active .input").append("<button class='btn btn-default character'>"+character+"</button>");
 		});
 		this.renderScrambled({scrambled:"Play Again"});
 		this.playing = false;
@@ -190,10 +217,10 @@ Scramble.prototype.gameOver = function(){
 
 Scramble.prototype.renderScrambled = function(word){
 	for(var i=0;i<word.scrambled.length;i++){
-		$("#scrambled").append("<button class='btn btn-default character'>"+word.scrambled[i]+"</button>")
+		$(".active .scrambled").append("<button class='btn btn-default character'>"+word.scrambled[i]+"</button>")
 	}
-	$("#scrambled").addClass("bounceInUp");
-	$("#scrambled").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e){
+	$(".active .scrambled").addClass("bounceInUp");
+	$(".active .scrambled").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e){
 		$(this).removeClass("bounceInUp");
 	});
 }
@@ -201,19 +228,19 @@ Scramble.prototype.renderScrambled = function(word){
 Scramble.prototype.input = function(event){
 	if(this.playing){
 		if(typeof event === "string"){
-			$("#scrambled .character").each(function(scrambled_character){
+			$(".active .scrambled .character").each(function(scrambled_character){
 				if($(this).text() === event){
-					$("#input").append(this);
+					$(".active .input").append(this);
 					return false;
 				}
 			});
 		}else{
-			$("#input").append($(event.target));
+			$(".active .input").append($(event.target));
 		}
 
-		if($("#scrambled .character").length === 0){
+		if($(".active .scrambled .character").length === 0){
 			var word = "";
-			$("#input .character").each(function(){
+			$(".active .input .character").each(function(){
 				word += $(this).text();
 			});
 			this.socket.emit("submit", word);
@@ -224,7 +251,7 @@ Scramble.prototype.input = function(event){
 }
 
 Scramble.prototype.popInput = function(){
-	$("#scrambled").append($("#input .character").last());
+	$(".active .scrambled").append($(".active .input .character").last());
 }
 
 Scramble.prototype.correct = function(res){
@@ -238,16 +265,16 @@ Scramble.prototype.correct = function(res){
 	this.points += res.points;
 	$("#points").html(this.points+" pts");
 
-	$("#input .character").addClass("fadeout");
+	$(".active .input .character").addClass("fadeout");
 	this.socket.emit('scrambled');
-	$("#input").removeClass("typing").addClass("correct").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e){
+	$(".active .input").removeClass("typing").addClass("correct").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e){
 		$(".fadeout").remove();
 		$(this).removeClass("correct").addClass("typing");
 	});
 }
 
 Scramble.prototype.worng = function(){
-	$("#input").addClass("wrong").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
+	$(".active .input").addClass("wrong").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
 		$(this).removeClass("wrong");
 	});
 }
@@ -255,7 +282,10 @@ Scramble.prototype.worng = function(){
 Scramble.prototype.playOnline = function(){
 	$("#home, #game").hide();
 	$("#online-game, #bottom-menu").show();
+	$("#online-game").addClass("active");
+	$("#game").removeClass("active");
 	this.socket.emit('multiplay');
+	clearInterval(this.interval);
 }
 
 Scramble.prototype.userJoin = function(){

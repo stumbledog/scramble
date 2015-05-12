@@ -2,12 +2,15 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var cookie = require('cookie');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var request = require('request');
 var mongoose = require('mongoose');
 
-var word_controller = require('./controllers/word');
+var WordController = require('./controllers/word');
+var UserController = require('./controllers/user');
+
 //var leaderBoard = require('./controllers/leaderboard');
 var routes = require('./routes/index');
 
@@ -33,17 +36,20 @@ db.once('open', function (callback) {
     console.log("db connected");
 });
 
-word_controller.init();
+WordController.init();
 
-/* Socket */
-io.sockets.on('connection', function (socket) {	
 
-	console.log('A new user connected!');
+io.sockets.on('connection', function (socket) {
+	var cookies = cookie.parse(socket.handshake.headers.cookie);
+	socket.user_id = cookies.user_id.split('"')[1];
+	console.log('User(' + socket.user_id + ') connected!');
+
+	UserController.init(socket);
 
 	socket.on('scrambled', function(){
-		word_controller.getWord(function(data){
+		WordController.getWord(function(data){
 			socket.word = data.word;
-			socket.anagram = word_controller.anagram(data.word);
+			socket.anagram = WordController.anagram(data.word);
 			socket.emit('scrambled', { word:data.word, scrambled: data.scrambled });
 			console.log(data);
 		});
@@ -61,10 +67,10 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on('submit points', function(points){
-		user_controller.submitPoints(socket.id, "user name", points, function(myrecord){
-			user_controller.getLeaderBoard(function(leaderboard){
-				socket.emit('submit points', { myrecord:myrecord, leaderboard:leaderboard });
-			})
+		UserController.submitPoints(socket, points, function(myrecord){
+			// UserController.getLeaderBoard(function(leaderboard){
+			// 	socket.emit('submit points', { myrecord:myrecord, leaderboard:leaderboard });
+			// });
 		});
 	});
 

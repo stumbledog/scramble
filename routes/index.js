@@ -2,11 +2,21 @@ var express = require('express');
 var router = express.Router();
 
 //var LeaderBoard = require('../models/leaderboard');
-var User = require('../controllers/user');
+var UserModel = require('../models/user');
+var UserController = require('../controllers/user');
 
-/* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index');
+	if(req.cookies.user_id){
+		UserModel.findById(req.cookies.user_id, function(err, user){
+			if(user){
+				res.render('index');
+			}else{
+				UserController.saveUserAndHome(res);
+			}
+		});
+	}else{
+		UserController.saveUserAndHome(res);
+	}
 });
 
 module.exports = router;
