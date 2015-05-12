@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var request = require('request');
-//var mongoose = require('mongoose');
+var mongoose = require('mongoose');
 
 var word_controller = require('./controllers/word');
 //var leaderBoard = require('./controllers/leaderboard');
@@ -24,6 +24,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
+
+mongoose.connect('mongodb://localhost/scramble');
+var db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function (callback) {
+    console.log("db connected");
+});
 
 word_controller.init();
 
