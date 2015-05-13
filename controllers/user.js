@@ -3,8 +3,9 @@ var UserModel = require('../models/user');
 
 exports.init = function(socket){
 	UserModel.findById(socket.user_id, function(err, user){
+		socket.user_name = user.name;
 		socket.points = user.points;
-		socket.emit("best points", socket.points);
+		socket.emit("init", {user_name:socket.user_name, points:socket.points});
 	});
 }
 
@@ -30,3 +31,8 @@ exports.saveUserAndHome = function(res, callback){
 	});
 }
 
+exports.setUserName = function(socket){
+	UserModel.update({_id:socket.user_id}, {name:socket.user_name}, function(){
+		socket.emit("update user name", socket.user_name);
+	})
+}

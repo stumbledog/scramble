@@ -3,6 +3,13 @@ extends layout
 block content
   div.site-wrapper
     div.site-wrapper-inner
+      div#user_name_container.container
+        h3.color1 Please enter your name
+        div.input-group
+          input#user_name_input.form-control(type="text")
+          span.input-group-btn
+            button#user-name-submit.color0.background3.btn.btn-default(type="button") 
+              b Submit
       div#home.container
         div.margin-bottom-10px
           button.play(class="btn btn-play btn-home" type="button")
@@ -31,9 +38,9 @@ block content
         div.scrambled
       div#online-game.container
         div#clients.hidden-xs.col-sm-6          
-          div.player#player1
-          div.player#player2
-          div.player#player3
+          div.player
+          div.player
+          div.player
         div#mygame.col-xs-12.col-sm-6
           div#mygame-wrapper
             div#mygame-wrapper-inner

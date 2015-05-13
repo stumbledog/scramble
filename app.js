@@ -95,26 +95,37 @@ io.sockets.on('connection', function (socket) {
 			}
 		});
 
-		var clients = [];
+		socket.clients = [];
 		var clients_in_the_room = adapter.rooms[socket.room]; 
 		for (var clientId in clients_in_the_room ) {
-			clients.push(clientId);
+			socket.clients.push(clientId);
 		}
 
 		if(socket.host){
 			socket.emit('host', {room:socket.room});
 		}else{
-			socket.to(socket.room).emit('join', {id:socket.id});
-			socket.emit('client', {clients:clients});
+			socket.to(socket.room).emit('join', {id:socket.id, user_name:socket.user_name});
+			socket.emit('client', {clients:socket.clients});
 		}
 	});
 
-	socket.on('request start', function(){
-		socket.to(socket.room).emit('join', {id:socket.id});
+	socket.on('request game start', function(){
+		socket.emit('game start');
+		socket.to(socket.room).emit('game start');
 	});
 
+	socket.on('set user name', function(user_name){
+		socket.user_name = user_name;
+		UserController.setUserName(socket);
+	})
+
 	socket.on('disconnect', function () {
-		socket.to(socket.room).emit('host start game');
+		if(socket.host){
+			console.log("change host");
+			//socket.to(socket.room).emit('host start game');
+		}else{
+			socket.to(socket.room).emit('leave', {id:socket.id, user_name:socket.user_name});
+		}
 	});
 });
 
