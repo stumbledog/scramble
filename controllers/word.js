@@ -22,10 +22,17 @@ exports.getWord = function(callback){
 
 exports.getWordnik = function(callback){
 	request(word_api_url, function(err, res, body){
-		var word = JSON.parse(body).word.toLowerCase();
-		words.push({word:word, scrambled:this.scramble(word)});
-		if(typeof(callback) == "function"){
-			callback();
+		try{
+			var word = JSON.parse(body).word.toLowerCase();
+			words.push({word:word, scrambled:this.scramble(word)});
+			if(typeof(callback) == "function"){
+				callback();
+			}
+
+		}catch(e){
+			console.log("word parsing error: "+e);
+			console.log(body);
+			this.getWordnik(callback);
 		}
 	}.bind(this));
 }

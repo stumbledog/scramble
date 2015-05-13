@@ -3,7 +3,7 @@ function Scramble(){
 	this.playing = false;
 	this.points = 0;
 	this.best_points = 0;
-	this.clients = [];
+	//this.clients = [];
 	this.online = false;
 
 	initEventListener.call(this);
@@ -37,40 +37,17 @@ function Scramble(){
 			}
 		}.bind(this));
 
-		this.socket.on("host", function(res){
-			this.host = true;
-			this.clients = [];
-			this.renderScrambled({scrambled:"Start"}, "start");
-		}.bind(this));
-
-		this.socket.on("client", function(res){
-			this.host = false;
-			this.clients = res.clients.filter(function(client){
-				console.log(this);
-				if(client.id != this.socket.id){
-					return client;
-				}
-			}.bind(this));
-			console.log(this.clients);
-		}.bind(this));
-
 		this.socket.on("init", this.init.bind(this));
-		this.socket.on("join", this.userJoin.bind(this));
+		this.socket.on("host", this.setHost.bind(this));
+		this.socket.on("change host", this.setHost.bind(this));
+		this.socket.on("join", this.join.bind(this));
+		this.socket.on("client joined", this.clientJoin.bind(this));
+		this.socket.on("client left", this.clientLeft.bind(this));
 		this.socket.on("game start", this.play.bind(this));
 		this.socket.on("update user name", this.updateUserName.bind(this));
 		this.socket.on("best points", this.setBestPoints.bind(this));
-		
-		this.socket.on("leave", function(res){
-			console.log(res.user_name +" left");
-			console.log(res);
-			console.log(this.clients);
-			this.clients = this.clients.filter(function(client){
-				return client.id != res.id;
-			});
-			console.log(this.clients);
-		});
-
-
+		this.socket.on("clinet scrambled", this.clientScrambled.bind(this))
+		this.socket.on("client submit", this.clientSubmit.bind(this));
 
 		$(".site-wrapper").on("click", ".active .scrambled .character", this.input.bind(this));
 		$(".site-wrapper").on("click", ".active .input .character", function(e){
@@ -78,7 +55,7 @@ function Scramble(){
 				$(".active .scrambled").append($(e.target));
 			}else{
 				if($(e.currentTarget).hasClass("start")){
-					this.requestPlay();
+					this.socket.emit("request game start");
 				}
 			}
 		}.bind(this));
@@ -88,7 +65,7 @@ function Scramble(){
 }
 
 Scramble.prototype.init = function(res){
-	this.best_points = res.points;
+	this.best_points = res.best_points;
 	$(".best-points").text(this.best_points + " pts");
 	if(!res.user_name){
 		this.typingUserName = true;
@@ -109,59 +86,53 @@ Scramble.prototype.updateUserName = function(user_name){
 
 Scramble.prototype.singlePlay = function(){
 	$(".character").remove();
-	$("#home, #online-game").hide();
+	$("#home, #online-game, #leaderboard").hide();
 	$("#game, #bottom-menu").show();
 	$("#game").addClass("active");
 	$("#online-game").removeClass("active");
 
-	this.online = false;
+
+	if(this.online){
+		this.leave();
+	}
 	this.playing = false;
 	this.renderScrambled({scrambled:"Start"}, "start");
+
 	clearInterval(this.interval);
 }
 
 Scramble.prototype.playOnline = function(){
 	$(".character").remove();
-	$("#home, #game").hide();
+	$("#home, #game, #leaderboard").hide();
 	$("#online-game, #bottom-menu").show();
 	$("#online-game").addClass("active");
 	$("#game").removeClass("active");
-
 	this.online = true;
 	this.playing = false;
-	this.host = false;
-	this.socket.emit('multiplay');
+	//this.clients = [];
+	this.socket.emit('online');
 	clearInterval(this.interval);
 }
 
-Scramble.prototype.requestPlay = function(){
-	if(!this.online){
-		this.play();
-	}else{
-		this.socket.emit("request game start");
+Scramble.prototype.leaderboard = function(){
+	$("#home, #game, #online-game").hide();
+	$("#leaderboard, #bottom-menu").show();
+
+	if(this.online){
+		this.leave();
 	}
+	this.playing = false;
+	this.socket.emit('show leaderboard');
+	clearInterval(this.interval);
 }
 
 Scramble.prototype.play = function(){
 	$(".character").remove();
 	this.playing = true;
 	this.points = 0;
-	$("#points").html(this.points+" pts");
+	//$(".points").html("0 pts");
 	this.socket.emit('scrambled');
 	this.countDown();
-}
-
-Scramble.prototype.userJoin = function(res){
-	console.log(this);
-	console.log(res);
-
-	console.log(res.user_name + " joined");
-	this.clients.push({id:res.id, user_name:res.user_name});
-	this.clients.forEach(function(client, index){
-		$($(".player")[index]).append("<h2>"+client.user_name+"</h2>")
-	});
-	//console.log(this.clients);
-
 }
 
 Scramble.prototype.countDown = function(){
@@ -172,7 +143,7 @@ Scramble.prototype.countDown = function(){
 
 	this.interval = setInterval(function(){
 		now = new Date();
-		remain_time = Math.ceil((50000 - parseInt(now - start_time))/1000);
+		remain_time = Math.ceil((60000 - parseInt(now - start_time))/1000);
 
 		$(".count").html(remain_time+"s");
 
@@ -190,7 +161,7 @@ Scramble.prototype.gameOver = function(){
 
 	setTimeout(function(){
 		var str = this.points+" Points";
-		if(this.online && !this.host){
+		if(this.online && this.host !== this.socket.id){
 			str.split("").forEach(function(character){
 				$(".active .input").append("<button class='btn btn-default character'>"+character+"</button>");
 			});
@@ -210,6 +181,7 @@ Scramble.prototype.setBestPoints = function(best_points){
 }
 
 Scramble.prototype.renderScrambled = function(word, class_name){
+	$(".active .scrambled").html("");
 	class_name = (typeof class_name === "undefined")?"":class_name;
 	for(var i=0;i<word.scrambled.length;i++){
 		$(".active .scrambled").append("<button class='btn btn-default character " + class_name + "'>"+word.scrambled[i]+"</button>")
@@ -238,11 +210,11 @@ Scramble.prototype.input = function(e){
 			$(".active .input .character").each(function(){
 				word += $(this).text();
 			});
-			this.socket.emit("submit", word);
+			this.socket.emit("submit unscrambled", word);
 		}
 	}else{
 		if($(e.currentTarget).hasClass("start")){
-			this.requestPlay();
+			this.socket.emit("request game start");
 		}
 	}
 }
@@ -259,8 +231,12 @@ Scramble.prototype.correct = function(res){
 		});
 	}
 
-	this.points += res.points;
-	$(".points").html(this.points+" pts");
+	this.points = res.total_points;
+	if(this.online){
+		$("#mygame .points").html(this.points+" pts");
+	}else{
+		$("#game .points").html(this.points+" pts");
+	}
 
 	$(".active .input .character").addClass("fadeout");
 	this.socket.emit('scrambled');
@@ -274,6 +250,76 @@ Scramble.prototype.worng = function(){
 	$(".active .input").addClass("wrong").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
 		$(this).removeClass("wrong");
 	});
+}
+
+Scramble.prototype.join = function(res){
+	console.log(res);
+	this.host = res.host_id;
+	
+	this.renderClients(res.clients);
+
+	$(".host").removeClass("host");
+	$("#"+this.host).addClass("host");
+}
+
+Scramble.prototype.setHost = function(res){
+	this.host = res.host_id;
+
+	$(".host").removeClass("host");
+	if(this.host === this.socket.id){
+		$("#mygame").addClass("host");
+	}else{
+		$("#"+this.host).addClass("host");
+	}
+
+	if(!this.playing && this.online && this.socket.id === this.host){
+		this.renderScrambled({scrambled:"Start"}, "start");
+	}
+}
+
+Scramble.prototype.clientJoin = function(res){
+	console.log(res.user_name + " joined");
+	this.renderClients(res.clients);
+}
+
+Scramble.prototype.renderClients = function(clients){
+	var index = 1;
+	clients.forEach(function(client){
+		if(client.id !== this.socket.id){
+			$(".client:nth-child("+index+")").attr("id", client.id).find(".client-name").html(client.user_name);
+			index++;
+		}
+	}.bind(this));
+}
+
+Scramble.prototype.leave = function(){
+	this.socket.emit("leave");
+	this.host = false;
+	this.online = false;
+	this.playing = false;
+	this.clinet = [];
+	$(".client").removeAttr('id').find(".client-name, .points, .client-scrambled").html("");
+}
+
+Scramble.prototype.clientLeft = function(res){
+	$("#"+res.id + ".client").find(".client-name, .points, .client-scrambled").html("");
+	$("#"+res.id + ".client").removeAttr('id');
+	console.log(res.user_name +" left");
+}
+
+Scramble.prototype.clientScrambled = function(res){
+	$("#" + res.id + " .client-scrambled").html("");
+	for(var i=0;i<res.scrambled.length;i++){
+		$("#" + res.id + " .client-scrambled").append("<button class='btn btn-default character'>"+res.scrambled[i]+"</button>");
+	}
+}
+
+Scramble.prototype.clientSubmit = function(res){
+	console.log(res);
+}
+
+Scramble.prototype.reset = function(){
+
 }
 
 Scramble.prototype.keydown = function(e){
