@@ -44,6 +44,7 @@ io.sockets.on('connection', function (socket) {
 	socket.on('request game start', UserController.requestGameStart.bind(null, io, socket));
 	socket.on('disconnect', UserController.disconnected.bind(null, io, socket));
 	socket.on('leave', UserController.disconnected.bind(null, io, socket));
+	socket.on('show leaderboard', UserController.getLeaderboard.bind(null, socket));
 });
 
 module.exports = app;

@@ -9,7 +9,7 @@ exports.init = function(socket){
 		socket.user_name = user.name;
 		console.log(socket.user_name + " connected");
 		socket.best_points = user.points;
-		socket.emit("init", {user_name:socket.user_name, best_points:socket.best_points});
+		socket.emit("init", {user_id:user.id, user_name:socket.user_name, best_points:socket.best_points});
 	});
 }
 
@@ -18,6 +18,10 @@ exports.setUserName = function(socket, user_name){
 	UserModel.update({_id:socket.user_id}, {name:socket.user_name}, function(){
 		socket.emit("update user name", socket.user_name);
 	})
+}
+
+exports.getRoomList = function(io, socket){
+
 }
 
 exports.scrambled = function(socket){
@@ -41,6 +45,7 @@ exports.submit = function(io, socket, word){
 }
 
 exports.submitPoints = function(socket){
+	socket.to(socket.room).emit('client total points', {id:socket.id, total_points:socket.total_points});
 	UserModel.update({_id:socket.user_id, points:{$lt:socket.total_points}},{points:socket.total_points},function(err, result){
 		if(result.n === 1){
 			socket.best_points = socket.total_points;
@@ -49,17 +54,23 @@ exports.submitPoints = function(socket){
 	});
 }
 
-exports.getLeaderboard = function(){
-
+exports.getLeaderboard = function(socket){
+	UserModel.find({}).sort('-points').exec(function(err, users){
+		socket.emit('users order by points', users);
+	});
 }
 
 exports.requestGameStart = function(io, socket){
 	var adapter = io.sockets.adapter;
 	var connected = io.sockets.connected;
 
-	Object.keys(adapter.rooms[socket.room?socket.room:socket.id]).filter(function(user_key){
-		connected[user_key].total_points = 0;
-	});
+	if(adapter.rooms[socket.room]){
+		Object.keys(adapter.rooms[socket.room]).filter(function(user_key){
+			connected[user_key].total_points = 0;
+		});
+	}else{
+		socket.total_points = 0;
+	}
 
 	socket.emit('game start');
 	socket.to(socket.room).emit('game start');
@@ -82,8 +93,8 @@ exports.disconnected = function(io, socket){
 	var room = socket.room;
 	socket.leave(room);
 	if(socket.host){
-
 		socket.host = false;
+		console.log(adapter.rooms[room]);
 		if(adapter.rooms[room]){
 			var user_keys = Object.keys(adapter.rooms[room]);
 			if(user_keys.length > 0){
@@ -94,14 +105,13 @@ exports.disconnected = function(io, socket){
 					user.leave(user.room);
 					user.join(host.id);
 					user.room = host.id;
-					user.emit("change host",{host_id:host.id});
+					user.emit("change host", {host_id:host.id});
 				});
 
 			}
 		}
-	}else{
-		socket.leave(socket.room);
 	}
+	console.log(adapter.rooms);
 	socket.room = null;
 }
 
@@ -124,6 +134,8 @@ exports.online = function(io, socket){
 			return true;
 		}
 	});
+
+	console.log(adapter.rooms);
 
 	var users = this.getUsersInRoom(io, socket.room);
 

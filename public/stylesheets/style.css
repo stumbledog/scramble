@@ -35,8 +35,8 @@ h1,h2,h3,h4{
 }
 
 .background3{
-	background: #F77A52;
-	border-color: #644D52;
+	background: #F77A52 !important;
+	border-color: #644D52 !important;
 }
 
 .background3:hover{
@@ -161,12 +161,15 @@ h1,h2,h3,h4{
 	cursor:pointer;
 }
 
-#difficulty-level{
+#game{
 	display: none;
 }
 
-#game{
+#leaderboard{
 	display: none;
+	position: absolute;
+	top: 20px;
+	left: 20px;
 }
 
 .input{
@@ -190,10 +193,10 @@ h1,h2,h3,h4{
 
 .points-container,
 .best-points-container,
-.count-container{
+.count-container,
+.user{
 	display: inline-block;
-	margin-left: 5px;
-	margin-right: 5px;
+	margin: 5px;
 	background: #332532;
 	border-radius: 5px;
 	padding: 0 10px;
@@ -229,6 +232,7 @@ h1,h2,h3,h4{
 	width: 100%;
 }
 
+.result .character,
 .client-scrambled .character{
 	font-size: 30px;
 	height:65px;
@@ -255,7 +259,6 @@ h1,h2,h3,h4{
 	animation: blink 1.1s steps(2, start) infinite;
 	-webkit-animation-delay: 1.2s;
 	-webkit-animation: blink 1.1s steps(2, start) infinite;
-
 }
 
 .character{
@@ -290,31 +293,6 @@ h1,h2,h3,h4{
 	animation: blink 1.1s steps(2, start) infinite;
 	-webkit-animation-delay: 1.2s;
 	-webkit-animation: blink 1.1s steps(2, start) infinite;
-}
-
-#result{
-	position:fixed;
-	top:50%;
-	left:50%;
-	width:260px;
-	height:100px;
-	padding:20px;
-	margin-left: -130px;
-	margin-top: -50px;
-	display: none;
-	background: #FFF;
-	animation: bounceInDown 0.5s;
-	-webkit-animation: bounceInDown 0.5s;
-}
-
-#your-points,
-#your-rank{
-	color:#468966;
-}
-
-#leaderboard{
-	height:60%;
-	overflow-y:auto;
 }
 
 #select-level{

@@ -39,18 +39,6 @@
 }
 
 @media (min-width: 600px) and (max-width: 800px){
-	#mygame .character{
-		font-size: 24px;
-	}
-	#mygame .character,
-	#mygame .input,
-	#mygame .input:after{
-		height:49px;
-	}
-	#mygame .character,
-	#mygame .input:after{
-		width:30px;
-	}
 	.character{
 		font-size: 48px;
 	}
@@ -95,4 +83,34 @@
 	.input:after{
 		width:75px;
 	}
+}
+
+@media (max-width: 800px){
+	#mygame .character{
+		font-size: 24px;
+	}
+	#mygame .character,
+	#mygame .input,
+	#mygame .input:after{
+		height:49px;
+	}
+	#mygame .character,
+	#mygame .input:after{
+		width:30px;
+	}
+}
+
+@media (min-width: 800px) and (max-width: 1100px){
+	#mygame .character{
+		font-size: 24px;
+	}
+	#mygame .character,
+	#mygame .input,
+	#mygame .input:after{
+		height:49px;
+	}
+	#mygame .character,
+	#mygame .input:after{
+		width:30px;
+	}	
 }

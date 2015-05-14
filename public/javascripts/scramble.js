@@ -3,12 +3,26 @@ function Scramble(){
 	this.playing = false;
 	this.points = 0;
 	this.best_points = 0;
-	//this.clients = [];
 	this.online = false;
 
 	initEventListener.call(this);
 
 	function initEventListener(){
+		this.socket.on("init", this.init.bind(this));
+		this.socket.on("host", this.setHost.bind(this));
+		this.socket.on("change host", this.setHost.bind(this));
+		this.socket.on("join", this.join.bind(this));
+		this.socket.on("client joined", this.clientJoin.bind(this));
+		this.socket.on("client left", this.clientLeft.bind(this));
+		this.socket.on("game start", this.play.bind(this));
+		this.socket.on("update user name", this.updateUserName.bind(this));
+		this.socket.on("best points", this.setBestPoints.bind(this));
+		this.socket.on("clinet scrambled", this.clientScrambled.bind(this))
+		this.socket.on("client submit", this.clientSubmit.bind(this));
+		this.socket.on("client total points", this.clientTotalPoints.bind(this));
+		this.socket.on("users order by points", this.renderLeaderboard.bind(this));
+
+
 		$("#user-name-submit").click(function(){
 			this.socket.emit("set user name", $("#user_name_input").val());
 		}.bind(this));
@@ -25,6 +39,12 @@ function Scramble(){
 			}
 		}.bind(this));
 
+		$(".leaderboard").click(function(){
+			if(!$("#leaderboard").hasClass("active")){
+				this.leaderboard();
+			}
+		}.bind(this));
+
 		this.socket.on("scrambled", function(res){
 			this.renderScrambled(res);
 		}.bind(this));
@@ -37,17 +57,6 @@ function Scramble(){
 			}
 		}.bind(this));
 
-		this.socket.on("init", this.init.bind(this));
-		this.socket.on("host", this.setHost.bind(this));
-		this.socket.on("change host", this.setHost.bind(this));
-		this.socket.on("join", this.join.bind(this));
-		this.socket.on("client joined", this.clientJoin.bind(this));
-		this.socket.on("client left", this.clientLeft.bind(this));
-		this.socket.on("game start", this.play.bind(this));
-		this.socket.on("update user name", this.updateUserName.bind(this));
-		this.socket.on("best points", this.setBestPoints.bind(this));
-		this.socket.on("clinet scrambled", this.clientScrambled.bind(this))
-		this.socket.on("client submit", this.clientSubmit.bind(this));
 
 		$(".site-wrapper").on("click", ".active .scrambled .character", this.input.bind(this));
 		$(".site-wrapper").on("click", ".active .input .character", function(e){
@@ -66,6 +75,7 @@ function Scramble(){
 
 Scramble.prototype.init = function(res){
 	this.best_points = res.best_points;
+	this.user_id = res.user_id;
 	$(".best-points").text(this.best_points + " pts");
 	if(!res.user_name){
 		this.typingUserName = true;
@@ -89,8 +99,7 @@ Scramble.prototype.singlePlay = function(){
 	$("#home, #online-game, #leaderboard").hide();
 	$("#game, #bottom-menu").show();
 	$("#game").addClass("active");
-	$("#online-game").removeClass("active");
-
+	$("#online-game, #leaderboard").removeClass("active");
 
 	if(this.online){
 		this.leave();
@@ -106,10 +115,9 @@ Scramble.prototype.playOnline = function(){
 	$("#home, #game, #leaderboard").hide();
 	$("#online-game, #bottom-menu").show();
 	$("#online-game").addClass("active");
-	$("#game").removeClass("active");
+	$("#game, #leaderboard").removeClass("active");
 	this.online = true;
 	this.playing = false;
-	//this.clients = [];
 	this.socket.emit('online');
 	clearInterval(this.interval);
 }
@@ -117,6 +125,8 @@ Scramble.prototype.playOnline = function(){
 Scramble.prototype.leaderboard = function(){
 	$("#home, #game, #online-game").hide();
 	$("#leaderboard, #bottom-menu").show();
+	$("#leaderboard").addClass("active");
+	$("#game, #online-game").removeClass("active");
 
 	if(this.online){
 		this.leave();
@@ -130,7 +140,6 @@ Scramble.prototype.play = function(){
 	$(".character").remove();
 	this.playing = true;
 	this.points = 0;
-	//$(".points").html("0 pts");
 	this.socket.emit('scrambled');
 	this.countDown();
 }
@@ -156,7 +165,6 @@ Scramble.prototype.countDown = function(){
 }
 
 Scramble.prototype.gameOver = function(){
-	this.socket.emit('submit points',this.points);
 	$(".character").remove();
 
 	setTimeout(function(){
@@ -172,7 +180,9 @@ Scramble.prototype.gameOver = function(){
 			this.renderScrambled({scrambled:"Play Again"}, "start");			
 		}
 		this.playing = false;
+		this.socket.emit('submit points',this.points);
 	}.bind(this), 500);
+
 }
 
 Scramble.prototype.setBestPoints = function(best_points){
@@ -210,7 +220,10 @@ Scramble.prototype.input = function(e){
 			$(".active .input .character").each(function(){
 				word += $(this).text();
 			});
-			this.socket.emit("submit unscrambled", word);
+			if(word){
+				this.socket.emit("submit unscrambled", word);
+			}
+
 		}
 	}else{
 		if($(e.currentTarget).hasClass("start")){
@@ -316,10 +329,31 @@ Scramble.prototype.clientScrambled = function(res){
 
 Scramble.prototype.clientSubmit = function(res){
 	console.log(res);
+	var result = res.correct ? res.anagram ? "Anagram Bonus" + res.points + " Points " : res.points + " Points " : "Wrong";
+	$("#" + res.id + " .result").html(result);
+	$("#" + res.id + " .points").html(res.total_points + " pts");
 }
 
-Scramble.prototype.reset = function(){
+Scramble.prototype.clientTotalPoints = function(res){
+	console.log(res);
+	var result = res.total_points + " Points";
+	$("#" + res.id + " .result").html("");
+	for(var i=0;i<result.length;i++){
+		$("#" + res.id + " .result").append("<button class='btn btn-default character'>"+result[i]+"</button>");
+	}
+}
 
+Scramble.prototype.renderLeaderboard = function(users){
+	$("#user-list").html("");
+	console.log(this.socket);
+	users.forEach(function(user){
+		console.log(this.user_id, user._id);
+		if(this.user_id === user._id){
+			$("#user-list").append("<div class='user background3'><h4 class='color0'>"+user.name+"</h4><h4 class='color0'>"+user.points+" pts</h4></div>");
+		}else{
+			$("#user-list").append("<div class='user'><h4 class='color0'>"+user.name+"</h4><h4 class='color0'>"+user.points+" pts</h4></div>");
+		}
+	}.bind(this));
 }
 
 Scramble.prototype.keydown = function(e){
