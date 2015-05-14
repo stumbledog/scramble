@@ -6,10 +6,12 @@ exports.init = function(socket){
 	socket.user_id = cookie.parse(socket.handshake.headers.cookie).user_id.split('"')[1];
 
 	UserModel.findById(socket.user_id, function(err, user){
-		socket.user_name = user.name;
-		console.log(socket.user_name + " connected");
-		socket.best_points = user.points;
-		socket.emit("init", {user_id:user.id, user_name:socket.user_name, best_points:socket.best_points});
+		if(user){
+			socket.user_name = user.name;
+			console.log(socket.user_name + " connected");
+			socket.best_points = user.points;
+			socket.emit("init", {user_id:user.id, user_name:socket.user_name, best_points:socket.best_points});
+		}
 	});
 }
 

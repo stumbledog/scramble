@@ -312,12 +312,12 @@ Scramble.prototype.leave = function(){
 	this.online = false;
 	this.playing = false;
 	this.clinet = [];
-	$(".client").removeAttr('id').find(".client-name, .points, .client-scrambled .result").html("");
+	$(".client").removeAttr('id').find(".client-name, .points, .client-scrambled, .result").html("");
 	$(".xs-client").removeAttr('id').find(".client-name, .client-points").html("");
 }
 
 Scramble.prototype.clientLeft = function(res){
-	$("#"+res.id + ".client").removeAttr('id').find(".client-name, .points, .client-scrambled .result").html("");
+	$("#"+res.id + ".client").removeAttr('id').find(".client-name, .points, .client-scrambled, .result").html("");
 	$("#xs-"+res.id + ".xs-client").removeAttr('id').find(".client-name, .client-points").html("");
 	console.log(res.user_name +" left");
 }
@@ -330,7 +330,7 @@ Scramble.prototype.clientScrambled = function(res){
 }
 
 Scramble.prototype.clientSubmit = function(res){
-	var result = res.correct ? res.anagram ? "Anagram Bonus" + res.points + " Points " : res.points + " Points " : "Wrong";
+	var result = res.correct ? res.anagram ? "Anagram! " + res.points + " Points " : res.points + " Points " : "Wrong";
 	$("#" + res.id + " .result").html(result);
 	$("#" + res.id + " .points").html(res.total_points + " pts");
 	$("#xs-"+res.id + ".xs-client .client-points").html(res.total_points + " pts");
