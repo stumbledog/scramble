@@ -299,7 +299,8 @@ Scramble.prototype.renderClients = function(clients){
 	var index = 1;
 	clients.forEach(function(client){
 		if(client.id !== this.socket.id){
-			$(".client:nth-child("+index+")").attr("id", client.id).find(".client-name").html(client.user_name);
+			$("#clients .client:nth-child("+index+")").attr("id", client.id).find(".client-name").html(client.user_name);
+			$("#xs-clients .xs-client:nth-child("+index+")").attr("id", "xs-"+client.id).find(".client-name").html(client.user_name.length > 6 ? client.user_name.substring(0,6)+"..." : client.user_name);
 			index++;
 		}
 	}.bind(this));
@@ -312,10 +313,12 @@ Scramble.prototype.leave = function(){
 	this.playing = false;
 	this.clinet = [];
 	$(".client").removeAttr('id').find(".client-name, .points, .client-scrambled .result").html("");
+	$(".xs-client").removeAttr('id').find(".client-name, .client-points").html("");
 }
 
 Scramble.prototype.clientLeft = function(res){
 	$("#"+res.id + ".client").removeAttr('id').find(".client-name, .points, .client-scrambled .result").html("");
+	$("#xs-"+res.id + ".xs-client").removeAttr('id').find(".client-name, .client-points").html("");
 	console.log(res.user_name +" left");
 }
 
@@ -330,6 +333,7 @@ Scramble.prototype.clientSubmit = function(res){
 	var result = res.correct ? res.anagram ? "Anagram Bonus" + res.points + " Points " : res.points + " Points " : "Wrong";
 	$("#" + res.id + " .result").html(result);
 	$("#" + res.id + " .points").html(res.total_points + " pts");
+	$("#xs-"+res.id + ".xs-client .client-points").html(res.total_points + " pts");
 }
 
 Scramble.prototype.clientTotalPoints = function(res){
@@ -337,6 +341,7 @@ Scramble.prototype.clientTotalPoints = function(res){
 	$("#" + res.id + " .result").html("");
 	for(var i=0;i<result.length;i++){
 		$("#" + res.id + " .result").append("<button class='btn btn-default character'>"+result[i]+"</button>");
+		$("#xs-"+res.id + ".xs-client .client-points").html(res.total_points + " pts");
 	}
 }
 

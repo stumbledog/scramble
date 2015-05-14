@@ -200,13 +200,23 @@ h1,h2,h3,h4{
 
 .points-container,
 .best-points-container,
-.count-container{
+.count-container,
+.xs-client{
 	display: inline-block;
 	margin: 5px;
 	background: #332532;
 	border-radius: 5px;
 	padding: 0 10px;
 	color:#FFF;
+}
+
+.xs-client{
+	margin-top:10px;
+}
+
+.xs-client .client-name,
+.xs-client .client-points{
+	font-size: 12px;
 }
 
 .correct{
