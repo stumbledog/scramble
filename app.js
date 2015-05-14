@@ -38,7 +38,7 @@ io.sockets.on('connection', function (socket) {
 	UserController.init(socket);
 	socket.on('set user name', UserController.setUserName.bind(null, socket));
 	socket.on('scrambled', UserController.scrambled.bind(null, socket));
-	socket.on('submit unscrambled', UserController.submit.bind(UserController, io, socket));
+	socket.on('submit unscrambled', UserController.submitAnswer.bind(UserController, io, socket));
 	socket.on('submit points', UserController.submitPoints.bind(null, socket));
 	socket.on('online', UserController.online.bind(UserController, io, socket));
 	socket.on('request game start', UserController.requestGameStart.bind(null, io, socket));

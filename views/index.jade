@@ -77,7 +77,14 @@ block content
                 div.scrambled
       div#leaderboard
         h1 Leaderboard
-        div#user-list
+        table#user-list.table
+          thead
+            tr
+              th Rank
+              th Name
+              th Best Points
+              th Number of correct answers
+          tbody
       div#bottom-menu
         div.play.inline-block.btn-bottom
           i(class="fa fa-user fa-2x")

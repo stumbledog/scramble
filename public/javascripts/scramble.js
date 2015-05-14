@@ -266,7 +266,6 @@ Scramble.prototype.worng = function(){
 }
 
 Scramble.prototype.join = function(res){
-	console.log(res);
 	this.host = res.host_id;
 	
 	this.renderClients(res.clients);
@@ -311,12 +310,11 @@ Scramble.prototype.leave = function(){
 	this.online = false;
 	this.playing = false;
 	this.clinet = [];
-	$(".client").removeAttr('id').find(".client-name, .points, .client-scrambled").html("");
+	$(".client").removeAttr('id').find(".client-name, .points, .client-scrambled .result").html("");
 }
 
 Scramble.prototype.clientLeft = function(res){
-	$("#"+res.id + ".client").find(".client-name, .points, .client-scrambled").html("");
-	$("#"+res.id + ".client").removeAttr('id');
+	$("#"+res.id + ".client").removeAttr('id').find(".client-name, .points, .client-scrambled .result").html("");
 	console.log(res.user_name +" left");
 }
 
@@ -328,14 +326,12 @@ Scramble.prototype.clientScrambled = function(res){
 }
 
 Scramble.prototype.clientSubmit = function(res){
-	console.log(res);
 	var result = res.correct ? res.anagram ? "Anagram Bonus" + res.points + " Points " : res.points + " Points " : "Wrong";
 	$("#" + res.id + " .result").html(result);
 	$("#" + res.id + " .points").html(res.total_points + " pts");
 }
 
 Scramble.prototype.clientTotalPoints = function(res){
-	console.log(res);
 	var result = res.total_points + " Points";
 	$("#" + res.id + " .result").html("");
 	for(var i=0;i<result.length;i++){
@@ -344,14 +340,13 @@ Scramble.prototype.clientTotalPoints = function(res){
 }
 
 Scramble.prototype.renderLeaderboard = function(users){
-	$("#user-list").html("");
-	console.log(this.socket);
-	users.forEach(function(user){
-		console.log(this.user_id, user._id);
+	$("#user-list tbody").html("");
+
+	users.forEach(function(user, index){
 		if(this.user_id === user._id){
-			$("#user-list").append("<div class='user background3'><h4 class='color0'>"+user.name+"</h4><h4 class='color0'>"+user.points+" pts</h4></div>");
+			$("#user-list tbody").append("<tr class='background2 color0'><td>"+(index+1)+"</td><td>"+user.name+"</td><td>"+user.points+"</td><td>"+user.correct+"</td></tr>");
 		}else{
-			$("#user-list").append("<div class='user'><h4 class='color0'>"+user.name+"</h4><h4 class='color0'>"+user.points+" pts</h4></div>");
+			$("#user-list tbody").append("<tr><td>"+(index+1)+"</td><td>"+user.name+"</td><td>"+user.points+"</td><td>"+user.correct+"</td></tr>");
 		}
 	}.bind(this));
 }

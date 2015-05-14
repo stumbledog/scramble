@@ -14,7 +14,8 @@ exports.init = function(socket){
 }
 
 exports.setUserName = function(socket, user_name){
-	socket.user_name = user_name;
+	socket.user_name = user_name.length > 20 ? user_name.substring(0, 20) : user_name;
+
 	UserModel.update({_id:socket.user_id}, {name:socket.user_name}, function(){
 		socket.emit("update user name", socket.user_name);
 	})
@@ -34,18 +35,28 @@ exports.scrambled = function(socket){
 	});
 }
 
-exports.submit = function(io, socket, word){
+exports.submitAnswer = function(io, socket, word){
 	var anagram = word === socket.anagram;
 	var correct = anagram || word === socket.word;
 	var points = correct ? (anagram ? word.length *2 : word.length) : 0;
+
 	console.log(word, socket.word);
+
 	socket.total_points += points;
 	socket.emit('submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
 	socket.to(socket.room).emit('client submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
+
+	if(correct){
+		UserModel.update({_id:socket.user_id},{$inc:{correct:1}}, function(err, result){
+			console.log(result);
+		});
+	}
 }
 
 exports.submitPoints = function(socket){
+
 	socket.to(socket.room).emit('client total points', {id:socket.id, total_points:socket.total_points});
+
 	UserModel.update({_id:socket.user_id, points:{$lt:socket.total_points}},{points:socket.total_points},function(err, result){
 		if(result.n === 1){
 			socket.best_points = socket.total_points;
@@ -94,7 +105,6 @@ exports.disconnected = function(io, socket){
 	socket.leave(room);
 	if(socket.host){
 		socket.host = false;
-		console.log(adapter.rooms[room]);
 		if(adapter.rooms[room]){
 			var user_keys = Object.keys(adapter.rooms[room]);
 			if(user_keys.length > 0){
@@ -111,7 +121,7 @@ exports.disconnected = function(io, socket){
 			}
 		}
 	}
-	console.log(adapter.rooms);
+
 	socket.room = null;
 }
 
@@ -134,8 +144,6 @@ exports.online = function(io, socket){
 			return true;
 		}
 	});
-
-	console.log(adapter.rooms);
 
 	var users = this.getUsersInRoom(io, socket.room);
 

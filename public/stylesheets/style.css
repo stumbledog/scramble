@@ -34,6 +34,11 @@ h1,h2,h3,h4{
 	color:#F77A52;
 }
 
+.background2{
+	background: #644D52 !important;
+	border-color: #332532 !important;
+}
+
 .background3{
 	background: #F77A52 !important;
 	border-color: #644D52 !important;
@@ -168,8 +173,10 @@ h1,h2,h3,h4{
 #leaderboard{
 	display: none;
 	position: absolute;
-	top: 20px;
-	left: 20px;
+	top: 0px;
+	width: 100%;
+	left: 0px;
+	padding: 30px;
 }
 
 .input{
@@ -193,8 +200,7 @@ h1,h2,h3,h4{
 
 .points-container,
 .best-points-container,
-.count-container,
-.user{
+.count-container{
 	display: inline-block;
 	margin: 5px;
 	background: #332532;
