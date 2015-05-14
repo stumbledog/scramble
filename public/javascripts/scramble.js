@@ -140,11 +140,12 @@ Scramble.prototype.play = function(){
 	$(".character").remove();
 	this.playing = true;
 	this.points = 0;
+	$(".my-points").html("0 pts");
 	this.socket.emit('scrambled');
-	this.countDown();
+	this.countDown(60);
 }
 
-Scramble.prototype.countDown = function(){
+Scramble.prototype.countDown = function(count){
 	var start_time, now, remain_time, interval;
 
   	start_time = new Date();
@@ -152,7 +153,7 @@ Scramble.prototype.countDown = function(){
 
 	this.interval = setInterval(function(){
 		now = new Date();
-		remain_time = Math.ceil((60000 - parseInt(now - start_time))/1000);
+		remain_time = Math.ceil((count * 1000 - parseInt(now - start_time))/1000);
 
 		$(".count").html(remain_time+"s");
 
