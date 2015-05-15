@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-//var LeaderBoard = require('../models/leaderboard');
 var UserModel = require('../models/user');
 var UserController = require('../controllers/user');
 

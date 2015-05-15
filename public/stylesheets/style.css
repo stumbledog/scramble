@@ -311,10 +311,6 @@ h1,h2,h3,h4{
 	-webkit-animation: blink 1.1s steps(2, start) infinite;
 }
 
-#select-level{
-	margin-right: 20px;
-}
-
 #online-game{
 	width:100%;
 	height:100%;

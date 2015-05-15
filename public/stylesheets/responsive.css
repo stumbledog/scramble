@@ -77,11 +77,11 @@
 	.character,
 	.input,
 	.input:after{
-		height:121px;
+		height:105px;
 	}
 	.character,
 	.input:after{
-		width:75px;
+		width:65px;
 	}
 }
 
@@ -100,7 +100,7 @@
 	}
 }
 
-@media (min-width: 800px) and (max-width: 1100px){
+@media (min-width: 800px){
 	#mygame .character{
 		font-size: 24px;
 	}

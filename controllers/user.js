@@ -23,11 +23,7 @@ exports.setUserName = function(socket, user_name){
 	})
 }
 
-exports.getRoomList = function(io, socket){
-
-}
-
-exports.scrambled = function(socket){
+exports.getScrambledWord = function(socket){
 	WordController.getWord(function(data){
 		socket.word = data.word;
 		socket.anagram = WordController.anagram(data.word);
@@ -45,8 +41,8 @@ exports.submitAnswer = function(io, socket, word){
 	console.log(word, socket.word);
 
 	socket.total_points += points;
-	socket.emit('submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
-	socket.to(socket.room).emit('client submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
+	socket.emit('result of submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
+	socket.to(socket.room).emit('result of client submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
 
 	if(correct){
 		UserModel.update({_id:socket.user_id},{$inc:{correct:1}}, function(err, result){
@@ -150,9 +146,9 @@ exports.online = function(io, socket){
 	var users = this.getUsersInRoom(io, socket.room);
 
 	if(socket.host){
-		socket.emit('host', {host_id:socket.id, clients:users});
+		socket.emit('set host', {host_id:socket.id, clients:users});
 	}else{
-		socket.emit('join', {host_id:socket.room, clients:users, user_name:socket.user_name});
+		socket.emit('join room', {host_id:socket.room, clients:users, user_name:socket.user_name});
 		socket.to(socket.room).emit('client joined', {clients:users, user_name:socket.user_name});
 	}
 }
