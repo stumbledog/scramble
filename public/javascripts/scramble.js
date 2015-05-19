@@ -232,13 +232,6 @@ Scramble.prototype.popSelectedCharacter = function(e){
 }
 
 Scramble.prototype.correct = function(res){
-	if(res.anagram){
-		$("#anagram").show().addClass("flash");
-		$("#anagram").one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(e){
-			$(this).removeClass("flash").hide();
-		});
-	}
-
 	this.points = res.total_points;
 	if(this.online){
 		$("#mygame .points").html(this.points+" pts");
@@ -324,7 +317,7 @@ Scramble.prototype.renderClientScrambledWord = function(res){
 }
 
 Scramble.prototype.clientSubmitWordResult = function(res){
-	var result = res.correct ? res.anagram ? "Anagram! " + res.points + " Points " : res.points + " Points " : "Wrong";
+	var result = res.correct ? res.points + " Points " : "Wrong";
 	$("#" + res.id + " .result").html(result);
 	$("#" + res.id + " .points").html(res.total_points + " pts");
 	$("#xs-"+res.id + ".xs-client .client-points").html(res.total_points + " pts");

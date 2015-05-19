@@ -26,7 +26,6 @@ exports.setUserName = function(socket, user_name){
 exports.getScrambledWord = function(socket){
 	WordController.getWord(function(data){
 		socket.word = data.word;
-		socket.anagram = WordController.anagram(data.word);
 		socket.emit('scrambled', { scrambled: data.scrambled });
 		socket.to(socket.room).emit('clinet scrambled', { id:socket.id, scrambled: data.scrambled });
 		console.log(data);
@@ -34,21 +33,21 @@ exports.getScrambledWord = function(socket){
 }
 
 exports.submitAnswer = function(io, socket, word){
-	var anagram = word === socket.anagram;
-	var correct = anagram || word === socket.word;
-	var points = correct ? (anagram ? word.length *2 : word.length) : 0;
+	WordController.checkAnswer(word, function(correct){
+		var points = correct ? word.length : 0;
 
-	console.log(word, socket.word);
+		console.log(word, socket.word);
 
-	socket.total_points += points;
-	socket.emit('result of submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
-	socket.to(socket.room).emit('result of client submit', {id:socket.id, correct:correct, anagram:anagram, points:points, total_points:socket.total_points});
+		socket.total_points += points;
+		socket.emit('result of submit', {id:socket.id, correct:correct, points:points, total_points:socket.total_points});
+		socket.to(socket.room).emit('result of client submit', {id:socket.id, correct:correct, points:points, total_points:socket.total_points});
 
-	if(correct){
-		UserModel.update({_id:socket.user_id},{$inc:{correct:1}}, function(err, result){
-			console.log(result);
-		});
-	}
+		if(correct){
+			UserModel.update({_id:socket.user_id},{$inc:{correct:1}}, function(err, result){
+				console.log(result);
+			});
+		}
+	});
 }
 
 exports.submitPoints = function(socket){
